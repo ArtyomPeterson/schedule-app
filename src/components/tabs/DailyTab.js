@@ -1,38 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import TimeInputs from '../TimeInputs/TimeInputs';
+import useTimeInput from '../TimeInputs/useTimeInput';
+
 
 function DailyTab({ onSave }) {
-    const [times, setTimes] = useState([{ id: 1, value: '' }]);
     const [useStep, setUseStep] = useState(false);
+    const {
+        times,
+        handleAddTimeField,
+        handleRemoveTimeField,
+        handleTimeChange
+    } = useTimeInput();
 
-    // Функция ставит текущее время в инпут Time
-    useEffect(() => {
-        const getCurrentTime = () => {
-            const now = new Date();
-            const hours = now.getHours().toString().padStart(2, '0'); // Добавляет 0 в начале если часы < 10
-            const minutes = now.getMinutes().toString().padStart(2, '0'); // Добавляет 0 в начале если минуты < 10
-            return `${hours}:${minutes}`;
-        };
-        setTimes([{ id: 1, value: getCurrentTime() }]);
-    }, []); // Пустой массив чтобы эффект запустился только один раз
 
-    // Добавление поля time
-    const handleAddTimeField = () => {
-        setTimes((prevTimes) => [
-            ...prevTimes,
-            { id: prevTimes.length + 1, value: '' }
-        ])
-    };
-
-    // Удаление поля time
-    const handleRemoveTimeField = (id) => {
-        setTimes((prevTimes) => prevTimes.filter((time) => time.id !== id));
-    };
-
-    const handleTimeChange = (id, value) => {
-        setTimes((prevTimes) =>
-            prevTimes.map((time) => (time.id === id ? { ...time, value } : time))
-        );
-    };
 
     const handleSave = () => {
         const isValid = times.every((time) => time.value !== '');
@@ -75,63 +55,20 @@ function DailyTab({ onSave }) {
 
     return (
         <div className='mt-4'>
-            {/* Первое поле ввода time */}
-            <div className='mb-2'>
-                <label>
-                    <input
-                        type='radio'
-                        name='inputType'
-                        checked={!useStep}
-                        onChange={() => setUseStep(false)}
-                    />
-                    At time:
-                </label>
-
+            <label>
                 <input
-                    type="time"
-                    value={times[0].value}
-                    onChange={(e) => handleTimeChange(times[0].id, e.target.value)}
-                    disabled={useStep}
+                    type='radio'
+                    name='inputType'
+                    checked={!useStep}
+                    onChange={() => setUseStep(false)}
                 />
+            </label>
 
-                {times.length > 1 && (
-                    <button
-                        className='ml-2'
-                        onClick={() => handleRemoveTimeField(times[0].id)}
-                    >
-                        Remove
-                    </button>
-                )}
-            </div>
-            {/* Все остальные поля ввода time */}
-            {times.slice(1).map((time) => (
-                <div key={time.id} className='mb-2'>
-                    <label>
-                        and at time
-                        <input
-                            type="time"
-                            value={time.value}
-                            onChange={(e) => handleTimeChange(time.id, e.target.value)}
-                            disabled={useStep}
-                        />
+            <TimeInputs />
 
-                        {times.length > 1 && (
-                            <button
-                                className='ml-2'
-                                onClick={() => handleRemoveTimeField(time.id)}
-                            >
-                                Remove
-                            </button>
-                        )}
-                    </label>
-                </div>
-            ))}
-
-            <button className='ml-2' onClick={handleAddTimeField}>
-                Add Time
-            </button>
 
             <br />
+
             <label>
                 <input
                     type="radio"
