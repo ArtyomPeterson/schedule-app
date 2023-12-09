@@ -1,24 +1,33 @@
-import logo from './logo.svg';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import React, { useState } from 'react';
+import Header from './components/Header';
+import Form from './components/Form';
+import Output from './components/Output';
 
 function App() {
+
+  const [activeTab, setActiveTab] = useState('daily');
+  const [cronExpression, setCronExpression] = useState('');
+
+  const handleSave = (expression) => {
+    setCronExpression(expression);
+  };
+
+  const handleLoad = (expression) => {
+    setCronExpression(expression);
+  };
+
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className='container'>
+      <Header />
+      <Form activeTab={activeTab} setActiveTab={setActiveTab} onSave={handleSave} />
+      <hr />
+      <Output cronExpression={cronExpression} onLoad={handleLoad} />
     </div>
+    // TODO добавить поле с логами. Типа истории ввода
+    // Вывести стили в отдельные файлы
   );
 }
 
