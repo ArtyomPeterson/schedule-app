@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
-function Output({ cronExpression, onLoad }) {
+function Output({ cronExpression, onLoad, onInputChange }) {
+
+    // useEffect(() => {
+
+    //     onInputChange(cronExpression);
+    // }, [cronExpression, onInputChange]);
+
     const handleLoad = () => {
-        //TODO логику сохранения данных
+
         onLoad(cronExpression);
     };
 
+
     return (
-        <div className='mt-4'>
-            <input type="text" value={cronExpression} readOnly />
-            <button onClick={handleLoad}>Load</button>
+        <div className='container output-container'>
+            <input type="text" value={cronExpression} onChange={(e) => onInputChange(e.target.value)} />
+            <button className='tab-button tab-secondary-button' onClick={handleLoad}>Load</button>
         </div>
     );
 }

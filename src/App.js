@@ -1,4 +1,3 @@
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import React, { useState } from 'react';
 import Header from './components/Header';
@@ -11,20 +10,26 @@ function App() {
   const [cronExpression, setCronExpression] = useState('');
 
   const handleSave = (expression) => {
+    console.log(expression);
     setCronExpression(expression);
   };
 
   const handleLoad = (expression) => {
+    console.log(expression);
     setCronExpression(expression);
   };
 
+  const handleInputChange = (expression) => {
+    // Обновление cronExpression при вводе из Output
+    setCronExpression(expression);
+  };
 
   return (
-    <div className='container'>
+    <div>
       <Header />
       <Form activeTab={activeTab} setActiveTab={setActiveTab} onSave={handleSave} />
       <hr />
-      <Output cronExpression={cronExpression} onLoad={handleLoad} />
+      <Output cronExpression={cronExpression} onLoad={handleLoad} onInputChange={handleInputChange} />
     </div>
     // TODO добавить поле с логами. Типа истории ввода
     // Вывести стили в отдельные файлы

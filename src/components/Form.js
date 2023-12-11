@@ -3,11 +3,13 @@ import DailyTab from './tabs/DailyTab';
 import WeeklyTab from './tabs/WeeklyTab';
 import MonthlyTab from './tabs/MonthlyTab';
 import CustomTab from './tabs/CustomTab';
+import './../App.css';
+
 
 function Form({ activeTab, setActiveTab, onSave }) {
     return (
-        <div>
-            <ul className="nav nav-tabs">
+        <div className="container mt-4">
+            <ul className="nav nav-tabs bg-dark">
                 <li className="nav-item">
                     <a
                         className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}

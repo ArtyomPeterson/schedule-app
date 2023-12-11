@@ -1,46 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import '../../App.css';
+
+
+const dayOfWeekNames = {
+    mon: 'Monday',
+    tue: 'Tuesday',
+    wed: 'Wednesday',
+    thu: 'Thursday',
+    fri: 'Friday',
+    sat: 'Saturday',
+    sun: 'Sunday'
+};
 
 function WeeklyTab({ onSave }) {
-
     const [times, setTimes] = useState([{ id: 1, value: '' }]);
-
-    const [selectedDays, setSelectedDays] = useState({
-        mon: false,
-        tue: false,
-        wed: false,
-        thu: false,
-        fri: false,
-        sat: false,
-        sun: false
-    });
-
-    const handleToggleWeekdays = () => {
-        setSelectedDays({
-            mon: true,
-            tue: true,
-            wed: true,
-            thu: true,
-            fri: true,
-            sat: false,
-            sun: false
-        });
-    };
-
-    const handleToggleWeekends = () => {
-        setSelectedDays({
-            mon: false,
-            tue: false,
-            wed: false,
-            thu: false,
-            fri: false,
-            sat: true,
-            sun: true
-        });
-    };
-
-    const handleToggleDay = (day) => {
-        setSelectedDays((prev) => ({ ...prev, [day]: !prev[day] }));
-    };
+    const [selectedDays, setSelectedDays] = useState(
+        Object.keys(dayOfWeekNames).reduce((acc, day) => {
+            acc[day] = false;
+            return acc;
+        }, {})
+    );
 
     // Функция ставит текущее время в инпут Time
     useEffect(() => {
@@ -57,130 +36,157 @@ function WeeklyTab({ onSave }) {
     const handleAddTimeField = () => {
         setTimes((prevTimes) => [
             ...prevTimes,
-            { id: prevTimes.length + 1, value: '' }
+            { id: prevTimes[prevTimes.length - 1].id + 1, value: '' }
         ])
     };
-
     // Удаление поля time
     const handleRemoveTimeField = (id) => {
         setTimes((prevTimes) => prevTimes.filter((time) => time.id !== id));
     };
-
+    // Изменение поля time
     const handleTimeChange = (id, value) => {
         setTimes((prevTimes) =>
             prevTimes.map((time) => (time.id === id ? { ...time, value } : time))
         );
     };
+    // Кнопка будни
+    const handleToggleWeekdays = () => {
+        setSelectedDays({
+            mon: true,
+            tue: true,
+            wed: true,
+            thu: true,
+            fri: true,
+            sat: false,
+            sun: false
+        });
+    };
+    // Кнопка выходные
+    const handleToggleWeekends = () => {
+        setSelectedDays({
+            mon: false,
+            tue: false,
+            wed: false,
+            thu: false,
+            fri: false,
+            sat: true,
+            sun: true
+        });
+    };
+    // Изменение списка дней
+    const handleToggleDay = (day) => {
+        setSelectedDays((prev) => ({
+            ...prev,
+            [day]: !prev[day]
+        }));
+    };
+
+
+
 
 
 
     const handleSave = () => {
-        const isValid = times.every((time) => time.value !== '');
-
-        if (!isValid) {
-            alert('Заполните все поля time.');
+        // Проверка на отсутствие пустых полей time
+        if (!(times.every((time) => time.value !== ''))) {
+            alert('Значение Time не должно быть пустым.');
             return;
         }
-
+        // Проверка на отсутствие дубликатов
+        const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
+        if (uniqueValues.length !== times.length) {
+            alert('Значения Times не должны повторяться.');
+            return;
+        }
+        // Проверка на наличие одинаковых часов или минут
         const areHoursEqual = times.every(
             (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
         );
-
         const areMinutesEqual = times.every(
             (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
         );
-
         if (!(areHoursEqual || areMinutesEqual)) {
-            alert('Часы и/или минуты должны быть одинаковыми.');
+            alert('Часы или минуты должны быть одинаковыми. Для тонкой настройки используйте вкладку Custom.');
             return;
         }
 
-
-        let cronExpression;
+        // Проверка на выделение хотя бы одного дня недели
+        if (!Object.values(selectedDays).some((value) => value)) {
+            alert('Выберите хотя бы один день недели.');
+            return;
+        }
 
         // Создание выражения CRON 
-        const selectedDaysArray = Object.keys(selectedDays).filter((day) => selectedDays[day]);
+        let cronExpression;
+
+        const selectedDaysArray = Object.keys(selectedDays)
+            .filter((day) => selectedDays[day]);
 
         if (areMinutesEqual) {
             cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')}  * * ${selectedDaysArray.join(',')}`;
         } else if (areHoursEqual) {
             cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * ${selectedDaysArray.join(',')}`;
+        } else {
+            alert('Что-то пошло не так.');
+            return;
         }
-        // Исправить ошибку: при введении двух одинаковых time, в поле CRON будет повторяться значение часов (50 14,14 * * * )
+        onSave(cronExpression);
+
         // Исправить ошибку: при невыбранных днях недели пропускается значение CRON.
         // TODO: ввести сокращение дней недели. mon,tue,wed,thu,fri должны стать mon-fri.
-        onSave(cronExpression);
     };
 
     return (
-        <div className='mt-4'>
+        <div className='tab-container'>
 
+            <label className='tab-label'>
+                At Time:
+            </label>
 
-            {/* Первое поле ввода time */}
-            <div className='mb-2'>
-                <label>
-                    At time:
+            {times.map((time) => (
+                <div key={time.id} className='mb-2'>
                     <input
                         type="time"
-                        value={times[0].value}
-                        onChange={(e) => handleTimeChange(times[0].id, e.target.value)}
+                        value={time.value}
+                        onChange={(e) => handleTimeChange(time.id, e.target.value)}
                     />
-                </label>
 
-                {times.length > 1 && (
-                    <button
-                        className='ml-2'
-                        onClick={() => handleRemoveTimeField(times[0].id)}
-                    >
-                        Remove
-                    </button>
-                )}
-            </div>
-
-            {/* Все остальные поля ввода time */}
-            {times.slice(1).map((time) => (
-                <div key={time.id} className='mb-2'>
-                    <label>
-                        and at time
-                        <input
-                            type="time"
-                            value={time.value}
-                            onChange={(e) => handleTimeChange(time.id, e.target.value)}
-                        />
-
-                        {times.length > 1 && (
-                            <button
-                                className='ml-2'
-                                onClick={() => handleRemoveTimeField(time.id)}
-                            >
-                                Remove
-                            </button>
-                        )}
-                    </label>
+                    {times.length > 1 && (
+                        <button
+                            className='tab-button tab-secondary-button'
+                            onClick={() => handleRemoveTimeField(time.id)}
+                        >
+                            Remove
+                        </button>
+                    )}
                 </div>
             ))}
 
-            <button className='ml-2' onClick={handleAddTimeField}>
+            <button className='mb-2 tab-button' onClick={handleAddTimeField}>
                 Add Time
             </button>
-
-            <label>
+            <br />
+            <label className='tab-label'>
                 Days:
-                <button onClick={handleToggleWeekdays} style={{ marginRight: '5px' }}>Weekdays</button>
-                <button onClick={handleToggleWeekends}>Weekends</button>
-                {Object.keys(selectedDays).map((day) => (
-                    <label key={day}>
-                        <input
-                            type="checkbox"
-                            checked={selectedDays[day]}
-                            onChange={() => handleToggleDay(day)}
-                        />
-                        {day}
-                    </label>
-                ))}
-
             </label>
-            <button onClick={handleSave}>Save</button>
+
+            {Object.keys(dayOfWeekNames).map((day) => (
+                <label key={day} className='tab-label'>
+                    <input
+                        type="checkbox"
+                        checked={selectedDays[day]}
+                        onChange={() => handleToggleDay(day)}
+                    />
+                    {dayOfWeekNames[day]}
+                </label>
+            ))}
+            <div className='button-container'>
+                <button onClick={handleToggleWeekdays} className='mb-2 tab-button'>Weekdays</button>
+                <button onClick={handleToggleWeekends} className='mb-2 tab-button'>Weekends</button>
+
+            </div>
+
+            <button className="mt-2 tab-button" onClick={handleSave}>Save</button>
         </div>
     );
 }
