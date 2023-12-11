@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/ArtyomPeterson/schedule-app/static/css/main.6b3e6bd2.css",
+    "main.js": "/ArtyomPeterson/schedule-app/static/js/main.7057fa82.js",
+    "static/js/787.714df83e.chunk.js": "/ArtyomPeterson/schedule-app/static/js/787.714df83e.chunk.js",
+    "index.html": "/ArtyomPeterson/schedule-app/index.html",
+    "main.6b3e6bd2.css.map": "/ArtyomPeterson/schedule-app/static/css/main.6b3e6bd2.css.map",
+    "main.7057fa82.js.map": "/ArtyomPeterson/schedule-app/static/js/main.7057fa82.js.map",
+    "787.714df83e.chunk.js.map": "/ArtyomPeterson/schedule-app/static/js/787.714df83e.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6b3e6bd2.css",
+    "static/js/main.7057fa82.js"
+  ]
+}
