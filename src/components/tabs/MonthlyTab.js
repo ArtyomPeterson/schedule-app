@@ -15,6 +15,14 @@ const monthNames = {
     12: 'December'
 };
 
+function areNumbersConsecutive(numbers) {
+    for (let i = 0; i < numbers.length - 1; i++) {
+        if (numbers[i] !== numbers[i + 1] - 1) {
+            return false;
+        }
+    }
+    return true;
+}
 
 function MonthlyTab({ onSave }) {
     const [times, setTimes] = useState([{ id: 1, value: '' }]);
@@ -110,17 +118,29 @@ function MonthlyTab({ onSave }) {
             return;
         }
 
-        // Создание выражения CRON 
-        let cronExpression;
-
         const selectedMonthsArray = Object.entries(selectedMonths)
             .filter(([_, isSelected]) => isSelected)
             .map(([month]) => parseInt(month, 10));
 
+        let months;
+
+        if (selectedMonthsArray.length === 12) {
+            months = "*";
+        } else if (areNumbersConsecutive(selectedMonthsArray)) {
+            months = `${selectedMonthsArray[0]}-${selectedMonthsArray[selectedMonthsArray.length - 1]}`;
+        } else {
+            months = `${selectedMonthsArray.join(',')}`;
+        }
+
+
+
+        let cronExpression;
+
+
         if (areMinutesEqual) {
-            cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} ${dayOfMonth} ${selectedMonthsArray.join(',')} *`;
+            cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} ${dayOfMonth} ${months} *`;
         } else if (areHoursEqual) {
-            cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} ${dayOfMonth} ${selectedMonthsArray.join(',')} *`;
+            cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} ${dayOfMonth} ${months} *`;
         } else {
             // вывести ошибку
         }

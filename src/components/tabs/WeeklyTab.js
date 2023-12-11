@@ -123,7 +123,7 @@ function WeeklyTab({ onSave }) {
             .filter((day) => selectedDays[day]);
 
         if (areMinutesEqual) {
-            cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')}  * * ${selectedDaysArray.join(',')}`;
+            cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} * * ${selectedDaysArray.join(',')}`;
         } else if (areHoursEqual) {
             cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * ${selectedDaysArray.join(',')}`;
         } else {

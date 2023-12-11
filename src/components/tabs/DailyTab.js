@@ -88,9 +88,9 @@ function DailyTab({ onSave }) {
 
             let cronExpression;
 
-            // Создание выражения CRON 
+
             if (areMinutesEqual) {
-                cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')}  * * *`;
+                cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} * * *`;
             } else if (areHoursEqual) {
                 cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * *`;
             } else {

@@ -6,7 +6,7 @@ import CustomTab from './tabs/CustomTab';
 import './../App.css';
 
 
-function Form({ activeTab, setActiveTab, onSave }) {
+function Form({ activeTab, setActiveTab, onSave, cronExpression }) {
     return (
         <div className="container mt-4">
             <ul className="nav nav-tabs bg-dark">
@@ -51,7 +51,7 @@ function Form({ activeTab, setActiveTab, onSave }) {
                 {activeTab === 'daily' && <DailyTab onSave={onSave} />}
                 {activeTab === 'weekly' && <WeeklyTab onSave={onSave} />}
                 {activeTab === 'monthly' && <MonthlyTab onSave={onSave} />}
-                {activeTab === 'custom' && <CustomTab onSave={onSave} />}
+                {activeTab === 'custom' && <CustomTab onSave={onSave} cronExpression={cronExpression} />}
             </div>
 
         </div>

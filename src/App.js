@@ -12,24 +12,23 @@ function App() {
   const handleSave = (expression) => {
     console.log(expression);
     setCronExpression(expression);
+
   };
 
   const handleLoad = (expression) => {
-    console.log(expression);
+    console.log("уже в app.js" + expression);
     setCronExpression(expression);
+    // отправить состояние cronExpression в CustomTab
+    setActiveTab('custom');
   };
 
-  const handleInputChange = (expression) => {
-    // Обновление cronExpression при вводе из Output
-    setCronExpression(expression);
-  };
 
   return (
     <div>
       <Header />
-      <Form activeTab={activeTab} setActiveTab={setActiveTab} onSave={handleSave} />
+      <Form activeTab={activeTab} setActiveTab={setActiveTab} onSave={handleSave} cronExpression={cronExpression} />
       <hr />
-      <Output cronExpression={cronExpression} onLoad={handleLoad} onInputChange={handleInputChange} />
+      <Output cronExpression={cronExpression} onLoad={handleLoad} />
     </div>
     // TODO добавить поле с логами. Типа истории ввода
     // Вывести стили в отдельные файлы
