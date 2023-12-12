@@ -12,6 +12,27 @@ const dayOfWeekNames = {
     sun: 'Sunday'
 };
 
+const dayOfWeekNumbers = {
+    0: 'mon',
+    1: 'tue',
+    2: 'wed',
+    3: 'thu',
+    4: 'fri',
+    5: 'sat',
+    6: 'sun'
+};
+
+
+function areNumbersConsecutive(numbers) {
+    for (let i = 0; i < numbers.length - 1; i++) {
+        if (numbers[i] !== numbers[i + 1] - 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
 function WeeklyTab({ onSave }) {
     const [times, setTimes] = useState([{ id: 1, value: '' }]);
     const [selectedDays, setSelectedDays] = useState(
@@ -20,6 +41,9 @@ function WeeklyTab({ onSave }) {
             return acc;
         }, {})
     );
+    const [errors, setErrors] = useState({});
+
+
 
     // Функция ставит текущее время в инпут Time
     useEffect(() => {
@@ -87,53 +111,88 @@ function WeeklyTab({ onSave }) {
 
 
     const handleSave = () => {
-        // Проверка на отсутствие пустых полей time
-        if (!(times.every((time) => time.value !== ''))) {
-            alert('Значение Time не должно быть пустым.');
-            return;
-        }
-        // Проверка на отсутствие дубликатов
-        const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
-        if (uniqueValues.length !== times.length) {
-            alert('Значения Times не должны повторяться.');
-            return;
-        }
-        // Проверка на наличие одинаковых часов или минут
-        const areHoursEqual = times.every(
-            (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
-        );
-        const areMinutesEqual = times.every(
-            (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
-        );
-        if (!(areHoursEqual || areMinutesEqual)) {
-            alert('Часы или минуты должны быть одинаковыми. Для тонкой настройки используйте вкладку Custom.');
-            return;
-        }
 
-        // Проверка на выделение хотя бы одного дня недели
-        if (!Object.values(selectedDays).some((value) => value)) {
-            alert('Выберите хотя бы один день недели.');
-            return;
-        }
+        setErrors(() => {
+            console.log(errors);
 
-        // Создание выражения CRON 
-        let cronExpression;
 
-        const selectedDaysArray = Object.keys(selectedDays)
-            .filter((day) => selectedDays[day]);
 
-        if (areMinutesEqual) {
-            cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} * * ${selectedDaysArray.join(',')}`;
-        } else if (areHoursEqual) {
-            cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * ${selectedDaysArray.join(',')}`;
-        } else {
-            alert('Что-то пошло не так.');
-            return;
-        }
-        onSave(cronExpression);
+            // Проверка на отсутствие пустых полей time
+            if (!(times.every((time) => time.value !== ''))) {
+                return {
+                    timeError: 'The Time value should not be empty.'
+                };
+            }
+            // Проверка на отсутствие дубликатов
+            const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
+            if (uniqueValues.length !== times.length) {
+                return {
+                    timeError: 'The Times values should not be repeated.'
+                };
+            }
+            // Проверка на наличие одинаковых часов или минут
+            const areHoursEqual = times.every(
+                (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
+            );
+            const areMinutesEqual = times.every(
+                (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
+            );
+            if (!(areHoursEqual || areMinutesEqual)) {
+                return {
+                    timeError: 'The hours or minutes should be the same. For detailed settings, use the Custom tab.'
+                };
+            }
 
-        // Исправить ошибку: при невыбранных днях недели пропускается значение CRON.
-        // TODO: ввести сокращение дней недели. mon,tue,wed,thu,fri должны стать mon-fri.
+            // Проверка на выделение хотя бы одного дня недели
+            if (!Object.values(selectedDays).some((value) => value)) {
+                return {
+                    daysOfWeekError: 'Choose at least one day of the week.'
+                };
+            }
+
+
+            //создаем массив выбранных дней
+            const selectedDaysArray = Object.keys(selectedDays)
+                .filter((day) => selectedDays[day]);
+            console.log("selectedDays " + selectedDays);
+            console.log("selectedDaysArray " + selectedDaysArray);
+
+            const selectedDaysNumbersArray = selectedDaysArray.map((day) => Object.keys(dayOfWeekNumbers).findIndex((num) => dayOfWeekNumbers[num] === day));
+
+            console.log(selectedDaysNumbersArray);
+
+            let selectedDaysCron;
+            if (selectedDaysArray.length === 7) {
+                selectedDaysCron = "*";
+            } else if (areNumbersConsecutive(selectedDaysNumbersArray)) {
+                selectedDaysCron = `${selectedDaysArray[0]}-${selectedDaysArray[selectedDaysArray.length - 1]}`;
+            } else {
+                selectedDaysCron = `${selectedDaysArray.join(',')}`;
+            }
+
+
+
+            // Создание выражения CRON 
+
+
+
+            let cronExpression;
+
+            if (areMinutesEqual) {
+                cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} * * ${selectedDaysCron}`;
+            } else if (areHoursEqual) {
+                cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * ${selectedDaysCron}`;
+            } else {
+                alert('Something went wrong.');
+                return;
+            }
+
+            onSave(cronExpression);
+            // если нет ошибок возвращает errors в изначальное состояние
+            return {};
+            // TODO: ввести сокращение дней недели. mon,tue,wed,thu,fri должны стать mon-fri.
+        });
+
     };
 
     return (
@@ -161,8 +220,10 @@ function WeeklyTab({ onSave }) {
                     )}
                 </div>
             ))}
+            {errors.timeError && <span>{errors.timeError}</span>}
 
-            <button className='mb-2 tab-button' onClick={handleAddTimeField}>
+
+            <button className='my-2 tab-button' onClick={handleAddTimeField}>
                 Add Time
             </button>
             <br />
@@ -180,8 +241,11 @@ function WeeklyTab({ onSave }) {
                     {dayOfWeekNames[day]}
                 </label>
             ))}
+            {errors.daysOfWeekError && <span>{errors.daysOfWeekError}</span>}
+
+
             <div className='button-container'>
-                <button onClick={handleToggleWeekdays} className='mb-2 tab-button'>Weekdays</button>
+                <button onClick={handleToggleWeekdays} className='m-2 tab-button'>Weekdays</button>
                 <button onClick={handleToggleWeekends} className='mb-2 tab-button'>Weekends</button>
 
             </div>

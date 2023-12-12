@@ -73,7 +73,7 @@ function CustomTab({ onSave, cronExpression }) {
         const validationErrors = validateForm(formData);
 
         // setErrors выполняется асинхронно
-        setErrors((prevErrors) => {
+        setErrors(() => {
             if (Object.keys(validationErrors).length > 0) {
                 console.log("formData не прошел проверку в CustomTab.js " + formData);
                 console.log("ошибки: " + validationErrors);

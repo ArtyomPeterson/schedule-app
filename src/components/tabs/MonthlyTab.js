@@ -33,6 +33,8 @@ function MonthlyTab({ onSave }) {
             return acc;
         }, {})
     );
+    const [errors, setErrors] = useState({});
+
 
     // Функция ставит текущее время в инпут Time
     useEffect(() => {
@@ -83,72 +85,79 @@ function MonthlyTab({ onSave }) {
 
 
     const handleSave = () => {
-        // Проверка на отсутствие пустых полей time
-        if (!(times.every((time) => time.value !== ''))) {
-            alert('Значение Time не должно быть пустым.');
-            return;
-        }
-        // Проверка на отсутствие дубликатов
-        const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
-        if (uniqueValues.length !== times.length) {
-            alert('Значения Times не должны повторяться.');
-            return;
-        }
-        // Проверка на наличие одинаковых часов или минут
-        const areHoursEqual = times.every(
-            (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
-        );
-        const areMinutesEqual = times.every(
-            (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
-        );
-        if (!(areHoursEqual || areMinutesEqual)) {
-            alert('Часы или минуты должны быть одинаковыми. Для тонкой настройки используйте вкладку Custom.');
-            return;
-        }
 
-        // Проверка на наличие дня месяца
-        if (!dayOfMonth) {
-            alert('Значение дня месяца не должно быть пустым.');
-            return;
-        }
+        setErrors(() => {
+            console.log(errors);
+            // Проверка на отсутствие пустых полей time
+            if (!(times.every((time) => time.value !== ''))) {
+                return {
+                    timeError: 'The Time value should not be empty.'
+                };
+            }
+            // Проверка на отсутствие дубликатов
+            const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
+            if (uniqueValues.length !== times.length) {
+                return {
+                    timeError: 'The Times values should not be repeated.'
+                };
+            }
+            // Проверка на наличие одинаковых часов или минут
+            const areHoursEqual = times.every(
+                (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
+            );
+            const areMinutesEqual = times.every(
+                (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
+            );
+            if (!(areHoursEqual || areMinutesEqual)) {
+                return {
+                    timeError: 'The hours or minutes should be the same. For detailed settings, use the Custom tab.'
+                };
+            }
 
-        // Проверка на выделение хотя бы одного месяца
-        if (!Object.values(selectedMonths).some((value) => value)) {
-            alert('Выберите хотя бы один месяц.');
-            return;
-        }
+            // Проверка на наличие дня месяца
+            if (!dayOfMonth) {
+                return {
+                    daysOfMonthError: 'Select the day of the month.'
+                };
+            }
 
-        const selectedMonthsArray = Object.entries(selectedMonths)
-            .filter(([_, isSelected]) => isSelected)
-            .map(([month]) => parseInt(month, 10));
+            // Проверка на выделение хотя бы одного месяца
+            if (!Object.values(selectedMonths).some((value) => value)) {
+                return {
+                    monthsError: 'Select at least one month.'
+                };
+            }
 
-        let months;
+            const selectedMonthsArray = Object.entries(selectedMonths)
+                .filter(([_, isSelected]) => isSelected)
+                .map(([month]) => parseInt(month, 10));
 
-        if (selectedMonthsArray.length === 12) {
-            months = "*";
-        } else if (areNumbersConsecutive(selectedMonthsArray)) {
-            months = `${selectedMonthsArray[0]}-${selectedMonthsArray[selectedMonthsArray.length - 1]}`;
-        } else {
-            months = `${selectedMonthsArray.join(',')}`;
-        }
+            let months;
+
+            if (selectedMonthsArray.length === 12) {
+                months = "*";
+            } else if (areNumbersConsecutive(selectedMonthsArray)) {
+                months = `${selectedMonthsArray[0]}-${selectedMonthsArray[selectedMonthsArray.length - 1]}`;
+            } else {
+                months = `${selectedMonthsArray.join(',')}`;
+            }
 
 
 
-        let cronExpression;
+            let cronExpression;
 
 
-        if (areMinutesEqual) {
-            cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} ${dayOfMonth} ${months} *`;
-        } else if (areHoursEqual) {
-            cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} ${dayOfMonth} ${months} *`;
-        } else {
-            // вывести ошибку
-        }
-        onSave(cronExpression);
+            if (areMinutesEqual) {
+                cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} ${dayOfMonth} ${months} *`;
+            } else if (areHoursEqual) {
+                cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} ${dayOfMonth} ${months} *`;
+            } else {
+                // вывести ошибку
+            }
+            onSave(cronExpression);
+            return {};
+        });
 
-        // + Исправить ошибку: Число месяца должно быть в диапазоне от 1 до 31.
-        // + Исправить ошибку: При невыбранном дне месяца пропускается значение CRON.
-        // + Исправить ошибку: Ппри невыбранном месяце пропускается значение CRON.
 
 
     };
@@ -177,8 +186,10 @@ function MonthlyTab({ onSave }) {
                     )}
                 </div>
             ))}
+            {errors.timeError && <span>{errors.timeError}</span>}
 
-            <button className='ml-2 tab-button' onClick={handleAddTimeField}>
+
+            <button className='my-2 tab-button' onClick={handleAddTimeField}>
                 Add Time
             </button>
 
@@ -194,6 +205,7 @@ function MonthlyTab({ onSave }) {
                 min="1"
                 max="31"
             />
+            {errors.daysOfMonthError && <span>{errors.daysOfMonthError}</span>}
 
 
             <br />
@@ -208,6 +220,7 @@ function MonthlyTab({ onSave }) {
                         </label>
                     ))}
                 </div>
+                {errors.monthsError && <span>{errors.monthsError}</span>}
             </label>
             <br />
             <button className="mt-2 tab-button" onClick={handleSave}>Save</button>

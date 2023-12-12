@@ -33,20 +33,20 @@ function Output({ cronExpression, onLoad }) {
         // подстрок должно быть 5
         if (substrings.length === 5) {
 
-            setFormData(prevFormData => ({
-                ...prevFormData,
+            const newFormData = {
                 minutes: substrings[0],
                 hours: substrings[1],
                 days: substrings[2],
                 months: substrings[3],
                 daysOfWeek: substrings[4]
-            }));
+            };
 
-            const validationErrors = validateForm(formData);
+            const validationErrors = validateForm(newFormData);
             console.log("validationErrors: ", validationErrors);
+            setFormData(newFormData);
 
 
-            setErrors((prevErrors) => {
+            setErrors(() => {
                 if (Object.keys(validationErrors).length > 0) {
                     console.log("userCronExpression не прошел проверку в Output.js " + userCronExpression);
                     console.log("ошибки: " + validationErrors);

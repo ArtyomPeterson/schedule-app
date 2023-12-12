@@ -6,6 +6,8 @@ function DailyTab({ onSave }) {
     const [times, setTimes] = useState([{ id: 1, value: '' }]);
     const [useStep, setUseStep] = useState(false);
     const [stepValue, setStepValue] = useState(5);
+    const [error, setError] = useState('');
+
 
 
     // Функция ставит текущее время в инпут Time
@@ -48,57 +50,50 @@ function DailyTab({ onSave }) {
     const handleSave = () => {
         if (useStep) {
 
-            // Логика для Step
-            // Проверка на наличие значения step
-            if (!stepValue) {
-                alert('Значение Step не должно быть пустым.');
-                return;
-            }
-            // Создание выражения CRON 
-            const cronExpression = `*/${stepValue} * * * *`;
+            setError(() => {
+                if (!stepValue) { return 'The Step value should not be empty.'; }
 
-            onSave(cronExpression);
-            return;
+                // Создание выражения CRON 
+                const cronExpression = `*/${stepValue} * * * *`;
+                onSave(cronExpression);
+                return;
+            });
+
 
         } else {
+            setError(() => {
+                console.log(error);
+                if (!(times.every((time) => time.value !== ''))) {
+                    return 'The Time value should not be empty.';
+                }
+                const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
+                if (uniqueValues.length !== times.length) {
+                    return 'The Times values should not be repeated.';
+                }
+                const areHoursEqual = times.every(
+                    (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
+                );
+                const areMinutesEqual = times.every(
+                    (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
+                );
+                if (!(areHoursEqual || areMinutesEqual)) {
+                    return 'The hours or minutes should be the same. For detailed settings, use the Custom tab.';
 
-            // Логика для Time
-            // Проверка на отсутствие пустых полей
-            if (!(times.every((time) => time.value !== ''))) {
-                alert('Значение Time не должно быть пустым.');
+                }
+
+                // Создание выражения CRON 
+                let cronExpression;
+                if (areMinutesEqual) {
+                    cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} * * *`;
+                } else if (areHoursEqual) {
+                    cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * *`;
+                } else {
+                    // вывести ошибку
+                }
+
+                onSave(cronExpression);
                 return;
-            }
-            // Проверка на отсутствие дубликатов
-            const uniqueValues = Array.from(new Set(times.map((time) => time.value)));
-            if (uniqueValues.length !== times.length) {
-                alert('Значения Times не должны повторяться.');
-                return;
-            }
-            // Проверка на наличие одинаковых часов или минут
-            const areHoursEqual = times.every(
-                (time) => time.value.split(':')[0] === times[0].value.split(':')[0]
-            );
-            const areMinutesEqual = times.every(
-                (time) => time.value.split(':')[1] === times[0].value.split(':')[1]
-            );
-            if (!(areHoursEqual || areMinutesEqual)) {
-                alert('Часы или минуты должны быть одинаковыми. Для тонкой настройки используйте вкладку Custom.');
-                return;
-            }
-
-            let cronExpression;
-
-
-            if (areMinutesEqual) {
-                cronExpression = `${times[0].value.split(':')[1]} ${times.map((time) => time.value.split(':')[0]).join(',')} * * *`;
-            } else if (areHoursEqual) {
-                cronExpression = `${times.map((time) => time.value.split(':')[1]).join(',')} ${times[0].value.split(':')[0]} * * *`;
-            } else {
-                // вывести ошибку
-            }
-
-            onSave(cronExpression);
-            return;//return наверное не нужен
+            });
         }
 
     }
@@ -136,8 +131,10 @@ function DailyTab({ onSave }) {
                     )}
                 </div>
             ))}
+            {error && !useStep && <span>{error}</span>}
 
-            <button className='mb-2 tab-button' onClick={handleAddTimeField} disabled={useStep}>
+
+            <button className='my-2 tab-button' onClick={handleAddTimeField} disabled={useStep}>
                 Add Time
             </button>
 
@@ -152,6 +149,7 @@ function DailyTab({ onSave }) {
                 Each:
             </label>
             <input
+                className='mx-2'
                 type="number"
                 value={stepValue}
                 onChange={handleStepChange}
@@ -162,12 +160,11 @@ function DailyTab({ onSave }) {
 
             minutes
             <br />
+            {error && useStep && <span>{error}</span>}
             <button className="mt-2 tab-button" onClick={handleSave}>Save</button>
-
         </div>
 
         // TODO сократить код. вывод инпута через функцию 
-        // Исправить ошибку: перечисление значений часов или минут должны идти в порядке возрастания
     );
 }
 
