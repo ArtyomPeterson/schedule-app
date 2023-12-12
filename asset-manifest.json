@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/ArtyomPeterson/schedule-app/static/css/main.6b3e6bd2.css",
-    "main.js": "/ArtyomPeterson/schedule-app/static/js/main.7057fa82.js",
+    "main.css": "/ArtyomPeterson/schedule-app/static/css/main.5c579238.css",
+    "main.js": "/ArtyomPeterson/schedule-app/static/js/main.eb08e543.js",
     "static/js/787.714df83e.chunk.js": "/ArtyomPeterson/schedule-app/static/js/787.714df83e.chunk.js",
     "index.html": "/ArtyomPeterson/schedule-app/index.html",
-    "main.6b3e6bd2.css.map": "/ArtyomPeterson/schedule-app/static/css/main.6b3e6bd2.css.map",
-    "main.7057fa82.js.map": "/ArtyomPeterson/schedule-app/static/js/main.7057fa82.js.map",
+    "main.5c579238.css.map": "/ArtyomPeterson/schedule-app/static/css/main.5c579238.css.map",
+    "main.eb08e543.js.map": "/ArtyomPeterson/schedule-app/static/js/main.eb08e543.js.map",
     "787.714df83e.chunk.js.map": "/ArtyomPeterson/schedule-app/static/js/787.714df83e.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.6b3e6bd2.css",
-    "static/js/main.7057fa82.js"
+    "static/css/main.5c579238.css",
+    "static/js/main.eb08e543.js"
   ]
 }
