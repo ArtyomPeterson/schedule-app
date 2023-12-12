@@ -6,13 +6,14 @@ function CustomTab({ onSave, cronExpression }) {
     const [errors, setErrors] = useState({});
     const [infoText, setInfoText] = useState('');
 
-    // Обновляем formData при изменении cronExpression
-    useEffect(() => {
-        if (cronExpression) {
-            console.log("cronExpression не undefined " + cronExpression);
-            const trimmedString = cronExpression.trim();
-            const substrings = trimmedString.split(' ');
+    const updateFormData = (expression) => {
+        console.log("вызван useEffect в CustomTab.js " + expression);
 
+        if (expression) {
+            console.log("cronExpression не undefined " + expression);
+            const trimmedString = expression.trim();
+            const substrings = trimmedString.split(' ');
+            console.log("userCronExpression разделен на массив строк " + substrings);
             if (substrings.length === 5) {
                 setFormData({
                     ...formData,
@@ -22,8 +23,19 @@ function CustomTab({ onSave, cronExpression }) {
                     months: substrings[3],
                     daysOfWeek: substrings[4],
                 });
+            } else {
+                alert('Неверный формат строки. Ожидается 5 подстрок.');
+                return {};
             }
-        } else { }
+        } else {
+            console.log("cronExpression undefined " + expression);
+        }
+    };
+
+
+    // Обновляем formData при изменении cronExpression
+    useEffect(() => {
+        updateFormData(cronExpression);
     }, [cronExpression]);
 
 
@@ -56,19 +68,28 @@ function CustomTab({ onSave, cronExpression }) {
     };
 
     const handleSave = () => {
+        console.log("вызван handleSave в CustomTab.js " + formData);
+
         const validationErrors = validateForm(formData);
 
-        //setErrors(validationErrors);
         // setErrors выполняется асинхронно
         setErrors((prevErrors) => {
             if (Object.keys(validationErrors).length > 0) {
+                console.log("formData не прошел проверку в CustomTab.js " + formData);
+                console.log("ошибки: " + validationErrors);
+
                 return validationErrors;
             } else {
+                console.log("formData прошел проверку в CustomTab.js " + formData);
                 const cronExpression = `${formData.minutes} ${formData.hours} ${formData.days} ${formData.months} ${formData.daysOfWeek}`;
-                onSave(cronExpression);
+                console.log("создан cronExpression " + cronExpression);
+                console.log("будет вызван onSave()");
+                onSave(cronExpression.trim());
                 return {};
             }
         });
+
+
 
     };
 
@@ -79,8 +100,8 @@ function CustomTab({ onSave, cronExpression }) {
                     <table>
                         <tbody>
                             {Object.keys(formData).map((fieldName) => (
-                                <tr key={fieldName}>
-                                    <td onClick={() => handleInfoClick(fieldName)}>
+                                <tr key={fieldName} onClick={() => handleInfoClick(fieldName)}>
+                                    <td >
                                         {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}:
                                     </td>
                                     <td>
@@ -104,7 +125,7 @@ function CustomTab({ onSave, cronExpression }) {
             </div>
 
             <div className="button-container">
-                <button onClick={handleSave}>Save</button>
+                <button className='tab-button' onClick={handleSave}>Save</button>
             </div>
         </div>
     );

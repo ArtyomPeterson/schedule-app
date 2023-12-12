@@ -12,6 +12,35 @@ export const validateForm = (formData) => {
     };
 
 
+
+
+    const maxValuesStep = {
+        minutes: 60,
+        hours: 24,
+        days: 31,
+        months: 12,
+        daysOfWeek: 7
+    };
+
+    const minValues = {
+        minutes: 0,
+        hours: 0,
+        days: 1,
+        months: 1,
+        daysOfWeek: 0
+    };
+
+
+
+    const maxValues = {
+        minutes: 59,
+        hours: 23,
+        days: 31,
+        months: 12,
+        daysOfWeek: 6
+    };
+
+
     //наполнение объекта errors
     const validateFieldAndSetErrors = (fieldValue, fieldName) => {
         const errorMessage = validateField(fieldValue, fieldName);
@@ -22,161 +51,99 @@ export const validateForm = (formData) => {
 
     //проверяет поле. если есть ошибка возвращает строку с ошибкой. если нет, то null
     const validateField = (fieldValue, fieldName) => {
-
         const parts = fieldValue.split(',');
 
         for (const part of parts) {
-
-            if (part === '') { // если введено пустое значение
+            // если введено пустое значение
+            if (part === '') {
                 return `${fieldName} - Invalid value. The value should not be empty.`;
-            } else if (part === '*') { // если введен *
+            }
+
+            // если введен *
+            if (part === '*') {
                 continue;
-            } else if (part.startsWith('*/')) { // если введен шаг
-                const number = part.substring(2);
-                if (!isNaN(number)) { // если после */ число (isNaN() преобразует "" в 0 )
-                    const parsedNumber = parseInt(number, 10);
+            }
 
-                    if (fieldName === 'minutes') {
-                        if (parsedNumber < 1 || parsedNumber > 60) {
-                            return `${fieldName} - Invalid step value. The step should be from 1 to 60`;
-                        }
-                        continue;
+            // если введен шаг
+            if (part.startsWith('*/')) {
+                const step = part.substring(2);
+                if (step === "") {
+                    return `${fieldName} - Invalid value. The value should not be empty.`;
+                }
+                if (!isNaN(step)) {
+                    console.log(step);
+                    const parsedNumber = parseInt(step, 10);
+                    console.log(parsedNumber);
+                    if (parsedNumber < 1 || parsedNumber > maxValuesStep[fieldName]) {
+                        return `${fieldName} - Invalid step value. The step should be from 1 to ${maxValues[fieldName]}`;
                     }
-                    if (fieldName === 'hours') {
-                        if (parsedNumber < 1 || parsedNumber > 24) {
-                            return `${fieldName} - Invalid step value. The step should be from 1 to 24`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'days') {
-                        if (parsedNumber < 1 || parsedNumber > 31) {
-                            return `${fieldName} - Invalid step value. The step should be from 1 to 31`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'months') {
-                        if (parsedNumber < 1 || parsedNumber > 12) {
-                            return `${fieldName} - Invalid step value. The step should be from 1 to 12`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'daysOfWeek') {
-                        if (parsedNumber < 1 || parsedNumber > 7) {
-                            return `${fieldName} - Invalid step value. The step should be from 1 to 7`;
-                        }
-                        continue;
-                    }
-                } else { return 'Invalid step value. Enter a number.' }
+                    continue;
+                } else {
+                    return 'Invalid step value. Enter a number.'
+                }
+            }
 
 
-            } else if (part.includes('-')) { // если введен диапазон        
+            // если введен диапазон
+            if (part.includes('-')) {
                 const [start, end] = part.split('-');
 
-                //isNaN преобразует пустую строку в 0. надо написать проверку.
-                // if (start.trim() === "" || end.trim() === "") {
-                //     вывести ошибку
-                // }
+                if (start === "" || end === "") {
+                    return `${fieldName} - Invalid value. The value should not be empty.`;
+                }
 
 
-                if (!isNaN(start) && !isNaN(end)) { // если оба значения — числа
-                    const parsedStart = parseInt(start, 10);
-                    const parsedEnd = parseInt(end, 10);
+                // если оба значения — строки (только daysOfWeek)
+                if (isNaN(start) && isNaN(end)) {
 
-                    if (fieldName === 'minutes') {
-                        if (parsedStart < 0 || parsedStart > 58 || parsedEnd < 1 || parsedEnd > 59 || parsedStart >= parsedEnd) {
-                            return `${fieldName} - Invalid range values. The range should be between 0 and 59`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'hours') {
-                        if (parsedStart < 0 || parsedStart > 22 || parsedEnd < 1 || parsedEnd > 23 || parsedStart >= parsedEnd) {
-                            return `${fieldName} - Invalid range values. The range should be between 0 and 23`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'days') {
-                        if (parsedStart < 1 || parsedStart > 30 || parsedEnd < 2 || parsedEnd > 31 || parsedStart >= parsedEnd) {
-                            return `${fieldName} - Invalid range values. The range should be between 1 and 31`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'months') {
-                        if (parsedStart < 1 || parsedStart > 11 || parsedEnd < 2 || parsedEnd > 12 || parsedStart >= parsedEnd) {
-                            return `${fieldName} - Invalid range values. The range should be between 1 and 12`;
-                        }
-                        continue;
-                    }
-                    if (fieldName === 'daysOfWeek') {
-                        if (parsedStart < 0 || parsedStart > 5 || parsedEnd < 1 || parsedEnd > 6 || parsedStart >= parsedEnd) {
-                            return `${fieldName} - Invalid range values. The range should be between 0 and 6`;
-                        }
-                        continue;
-                    }
-
-
-                } else if (isNaN(start) && isNaN(end)) { // если оба значения — строки
-                    console.log(start + " " + end);
                     if (Object.values(dayOfWeekNames).includes(start) && Object.values(dayOfWeekNames).includes(end)) {
-                        if (dayOfWeekNames[start] < dayOfWeekNames[end]) {
-                            continue
+                        if (Object.values(dayOfWeekNames).indexOf(start) < Object.values(dayOfWeekNames).indexOf(end)) {
+                            continue;
                         } else {
                             return `${fieldName} - Invalid range value. The first day in the range should be earlier than the last.`;
                         }
                     } else {
-                        return `${fieldName} - Invalid range value. Incorrect input format.`
+                        return `${fieldName} - Invalid range value. Incorrect input format.`;
                     }
-
-
-                } else { // если одно значение строка а другое число
-                    return `${fieldName} — Invalid range value.`
                 }
 
+                // если оба значения — числа
+                if (!isNaN(start) && !isNaN(end)) {
+                    const parsedStart = parseInt(start, 10);
+                    const parsedEnd = parseInt(end, 10);
+                    if (parsedStart < minValues[fieldName] || parsedEnd > maxValues[fieldName] || parsedStart >= parsedEnd) {
+                        return `${fieldName} - Invalid range values. The range should be between ${minValues[fieldName]} and ${maxValues[fieldName]}`;
+                    }
+                    continue;
+                }
 
-            } else if (!isNaN(part)) { // если введено число
+                // если одно значение строка а другое число
+                return `${fieldName} — Invalid range value.`;
+            }
+
+            if (!isNaN(part)) { // если введено число
                 const parsedNumber = parseInt(part, 10);
 
-                if (fieldName === 'minutes') {
-                    if (parsedNumber < 0 || parsedNumber > 59) {
-                        return `${fieldName} - Invalid value. The number must be from 0 to 59`;
-                    }
-                    continue;
+                if (parsedNumber < minValues[fieldName] || parsedNumber > maxValues[fieldName]) {
+                    return `${fieldName} - Invalid range values. The number must be from ${minValues[fieldName]} to ${maxValues[fieldName]}`;
                 }
-                if (fieldName === 'hours') {
-                    if (parsedNumber < 0 || parsedNumber > 23) {
-                        return `${fieldName} - Invalid value. The number must be from 0 to 23`;
-                    }
-                    continue;
-                }
-                if (fieldName === 'days') {
-                    if (parsedNumber < 1 || parsedNumber > 31) {
-                        return `${fieldName} - Invalid value. The number must be from 1 to 31`;
-                    }
-                    continue;
-                }
-                if (fieldName === 'months') {
-                    if (parsedNumber < 1 || parsedNumber > 12) {
-                        return `${fieldName} - Invalid value. The number must be from 1 to 12`;
-                    }
-                    continue;
-                }
-                if (fieldName === 'daysOfWeek') {
-                    if (parsedNumber < 0 || parsedNumber > 6) {
-                        return `${fieldName} - Invalid value. The number must be from 0 to 6`;
-                    }
-                    continue;
-                }
+                continue;
 
 
-            } else { // если введен текст
+
+
+            } else { // если введен текст (только daysOfWeek)
                 if (fieldName === 'daysOfWeek' && Object.values(dayOfWeekNames).includes(part)) {
+                    // if (fieldName === 'daysOfWeek' && dayOfWeekNames.hasOwnProperty(part)) {
+
                     continue;
                 } else {
                     return `${fieldName} - Invalid value.`;
                 }
             }
 
-            return "";
         };
+        return "";
 
     }
 

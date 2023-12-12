@@ -10,15 +10,15 @@ function App() {
   const [cronExpression, setCronExpression] = useState('');
 
   const handleSave = (expression) => {
-    console.log(expression);
+    console.log("вызван handleSave в App.js " + expression);
     setCronExpression(expression);
-
+    console.log("состояние cronExpression изменено на " + expression);
   };
 
   const handleLoad = (expression) => {
-    console.log("уже в app.js" + expression);
+    console.log("вызван handleLoad в App.js " + expression);
     setCronExpression(expression);
-    // отправить состояние cronExpression в CustomTab
+    console.log("состояние cronExpression изменено на " + expression);
     setActiveTab('custom');
   };
 

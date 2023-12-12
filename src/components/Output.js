@@ -4,53 +4,58 @@ import { validateForm } from '../validators/customFormValidator';
 function Output({ cronExpression, onLoad }) {
     const [formData, setFormData] = useState({ minutes: "", hours: "", days: "", months: "", daysOfWeek: "", });
     const [errors, setErrors] = useState({});
-    const [userCronExpression, setUserCronExpression] = useState(cronExpression);
+    const [userCronExpression, setUserCronExpression] = useState("");
 
 
     useEffect(() => {
         //при изменении cron expression автоматически меняется userCronExpression
         setUserCronExpression(cronExpression);
+        console.log("cronExpression " + cronExpression);
     }, [cronExpression]);
 
 
 
     const handleInputChange = (expression) => {
 
+        //TODO проверка 
         setUserCronExpression(expression);
+        console.log("userCronExpression " + userCronExpression);
     };
 
 
 
 
     const handleLoad = () => {
-        console.log("проверка " + userCronExpression);
-        //обрезаем пробелы
+        console.log("вызван handleLoad в Output.js " + userCronExpression);
         const trimmedString = userCronExpression.trim();
-        // делим на подстроки
         const substrings = trimmedString.split(' ');
-        console.log("подстроки" + substrings);
+        console.log("userCronExpression разделен на массив строк " + substrings);
         // подстрок должно быть 5
         if (substrings.length === 5) {
-            setFormData({
-                ...formData,
+
+            setFormData(prevFormData => ({
+                ...prevFormData,
                 minutes: substrings[0],
                 hours: substrings[1],
                 days: substrings[2],
                 months: substrings[3],
                 daysOfWeek: substrings[4]
-            });
+            }));
 
             const validationErrors = validateForm(formData);
+            console.log("validationErrors: ", validationErrors);
+
 
             setErrors((prevErrors) => {
                 if (Object.keys(validationErrors).length > 0) {
-                    console.log("output.js есть ошибки " + userCronExpression);
-                    console.log(validationErrors);
+                    console.log("userCronExpression не прошел проверку в Output.js " + userCronExpression);
+                    console.log("ошибки: " + validationErrors);
                     return validationErrors;
                 } else {
-                    console.log("output.js ошибок нет " + userCronExpression);
-
+                    console.log("userCronExpression прошел проверку в Output.js " + userCronExpression);
+                    console.log("будет вызван onLoad()");
                     onLoad(userCronExpression.trim());
+                    // TODO проверить
                     return {};
                 }
             });
