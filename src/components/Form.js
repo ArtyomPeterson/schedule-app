@@ -1,19 +1,29 @@
 import React from "react";
-import DailyTab from './tabs/DailyTab';
-import WeeklyTab from './tabs/WeeklyTab';
-import MonthlyTab from './tabs/MonthlyTab';
-import CustomTab from './tabs/CustomTab';
+import DailyTab from './tabs/DailyTab/DailyTab';
+import WeeklyTab from './tabs/WeeklyTab/WeeklyTab';
+import MonthlyTab from './tabs/MonthlyTab/MonthlyTab';
+import CustomTab from './tabs/CustomTab/CustomTab';
 import './../App.css';
 
 
-function Form({ activeTab, setActiveTab, onSave, cronExpression }) {
+const  Form = ({
+    onSave,
+    cronDailyExpression, 
+    cronWeeklyExpression, 
+    cronMonthlyExpression,
+    cronCustomExpression, 
+    activeTab, 
+    setActiveTab }) => {
+
+
+
     return (
         <div className="container mt-4">
             <ul className="nav nav-tabs bg-dark">
                 <li className="nav-item">
                     <a
                         className={`nav-link ${activeTab === 'daily' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('daily')}
+                        onClick={(e) => {e.preventDefault();setActiveTab('daily');}}
                         href="#" >
                         Daily
                     </a>
@@ -22,7 +32,7 @@ function Form({ activeTab, setActiveTab, onSave, cronExpression }) {
                 <li className="nav-item">
                     <a
                         className={`nav-link ${activeTab === 'weekly' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('weekly')}
+                        onClick={(e) => {e.preventDefault();setActiveTab('weekly');}}
                         href="#" >
                         Weekly
                     </a>
@@ -31,7 +41,7 @@ function Form({ activeTab, setActiveTab, onSave, cronExpression }) {
                 <li className="nav-item">
                     <a
                         className={`nav-link ${activeTab === 'monthly' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('monthly')}
+                        onClick={(e) => {e.preventDefault();setActiveTab('monthly');}}
                         href="#" >
                         Monthly
                     </a>
@@ -40,7 +50,7 @@ function Form({ activeTab, setActiveTab, onSave, cronExpression }) {
                 <li className="nav-item">
                     <a
                         className={`nav-link ${activeTab === 'custom' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('custom')}
+                        onClick={(e) => {e.preventDefault();setActiveTab('custom');}}
                         href="#" >
                         Custom
                     </a>
@@ -48,10 +58,10 @@ function Form({ activeTab, setActiveTab, onSave, cronExpression }) {
             </ul>
 
             <div className="tab-content">
-                {activeTab === 'daily' && <DailyTab onSave={onSave} />}
-                {activeTab === 'weekly' && <WeeklyTab onSave={onSave} />}
-                {activeTab === 'monthly' && <MonthlyTab onSave={onSave} />}
-                {activeTab === 'custom' && <CustomTab onSave={onSave} cronExpression={cronExpression} />}
+                {activeTab === 'daily' && <DailyTab onSave={onSave} cronDailyExpression={cronDailyExpression}/>}
+                {activeTab === 'weekly' && <WeeklyTab onSave={onSave} cronWeeklyExpression={cronWeeklyExpression}/>}
+                {activeTab === 'monthly' && <MonthlyTab onSave={onSave} cronMonthlyExpression={cronMonthlyExpression}/>}
+                {activeTab === 'custom' && <CustomTab onSave={onSave} cronCustomExpression={cronCustomExpression}/>}
             </div>
 
         </div>

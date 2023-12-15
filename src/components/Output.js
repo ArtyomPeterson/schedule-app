@@ -1,87 +1,81 @@
 import React, { useState, useEffect } from 'react';
-import { validateForm } from '../validators/customFormValidator';
+import { validateForm } from '../validators/cronValidator';
 
 function Output({ cronExpression, onLoad }) {
-    const [formData, setFormData] = useState({ minutes: "", hours: "", days: "", months: "", daysOfWeek: "", });
-    const [errors, setErrors] = useState({});
-    const [userCronExpression, setUserCronExpression] = useState("");
+    const [errors, setErrors] = useState();
+
+    const [userCronStringExpression, setUserCronStringExpression] = useState('');
+
 
 
     useEffect(() => {
-        //при изменении cron expression автоматически меняется userCronExpression
-        setUserCronExpression(cronExpression);
-        console.log("cronExpression " + cronExpression);
+        if (cronExpression) {
+            if (cronExpression.minutes.length === 0) {
+                console.log("cronExpression пустой " + cronExpression);
+            } else {
+                const cronString = `${cronExpression.minutes} ${cronExpression.hours} ${cronExpression.days} ${cronExpression.months} ${cronExpression.daysOfWeek}`;
+                setUserCronStringExpression(cronString);
+                            console.log("cronExpression string " + cronString);
+            }
+        }
     }, [cronExpression]);
 
-
-
     const handleInputChange = (expression) => {
-
-        //TODO проверка 
-        setUserCronExpression(expression);
-        console.log("userCronExpression " + userCronExpression);
+        setUserCronStringExpression(expression);
     };
-
-
 
 
     const handleLoad = () => {
-        console.log("вызван handleLoad в Output.js " + userCronExpression);
-        const trimmedString = userCronExpression.trim();
-        const substrings = trimmedString.split(' ');
-        console.log("userCronExpression разделен на массив строк " + substrings);
-        // подстрок должно быть 5
-        if (substrings.length === 5) {
 
-            const newFormData = {
-                minutes: substrings[0],
-                hours: substrings[1],
-                days: substrings[2],
-                months: substrings[3],
-                daysOfWeek: substrings[4]
+
+        const validationErrors = validateForm(userCronStringExpression);
+        setErrors({});
+
+
+        if (validationErrors && Object.keys(validationErrors).length === 0) {
+
+            const valuesArray = userCronStringExpression.split(" ").map((group) =>
+                group.split(",").map((value) => value.trim())
+            );
+
+            const newCronExpression = {
+                minutes: valuesArray[0],
+                hours: valuesArray[1],
+                days: valuesArray[2],
+                months: valuesArray[3],
+                daysOfWeek: valuesArray[4],
             };
 
-            const validationErrors = validateForm(newFormData);
-            console.log("validationErrors: ", validationErrors);
-            setFormData(newFormData);
-
-
-            setErrors(() => {
-                if (Object.keys(validationErrors).length > 0) {
-                    console.log("userCronExpression не прошел проверку в Output.js " + userCronExpression);
-                    console.log("ошибки: " + validationErrors);
-                    return validationErrors;
-                } else {
-                    console.log("userCronExpression прошел проверку в Output.js " + userCronExpression);
-                    console.log("будет вызван onLoad()");
-                    onLoad(userCronExpression.trim());
-                    // TODO проверить
-                    return {};
-                }
-            });
-
+            onLoad(newCronExpression);
 
         } else {
-            alert('Неверный формат строки. Ожидается 5 подстрок.');
-            return {};
+            setErrors(validationErrors);
+
         }
-    };
-
-
-
+    }
 
     return (
-        <div className='container output-container'>
-            <input type="text" value={userCronExpression} onChange={(e) => handleInputChange(e.target.value)} />
-            <button className='tab-button tab-secondary-button' onClick={handleLoad}>Load</button>
-            {Object.keys(formData).map((fieldName) => (
+        <div className='container'>
+
+
+
+            <input
+                type="text"
+                value={userCronStringExpression}
+                onChange={(e) => handleInputChange(e.target.value)}
+            />
+            <button className='' onClick={handleLoad}>Load</button>
+
+            {errors && Object.keys(errors).map((fieldName) => (
                 <div key={fieldName}>
                     {errors[fieldName] && <span>{errors[fieldName]}</span>}
                 </div>
             ))}
+
+
         </div>
 
     );
-}
+};
 
 export default Output;
