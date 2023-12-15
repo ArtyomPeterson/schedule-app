@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { validateForm } from '../validators/cronValidator';
 
 function Output({ cronExpression, onLoad }) {
-    const [errors, setErrors] = useState();
+    const [errors, setErrors] = useState([]);
 
     const [userCronStringExpression, setUserCronStringExpression] = useState('');
 
@@ -15,13 +15,14 @@ function Output({ cronExpression, onLoad }) {
             } else {
                 const cronString = `${cronExpression.minutes} ${cronExpression.hours} ${cronExpression.days} ${cronExpression.months} ${cronExpression.daysOfWeek}`;
                 setUserCronStringExpression(cronString);
-                            console.log("cronExpression string " + cronString);
+                console.log("cronExpression string " + cronString);
             }
         }
     }, [cronExpression]);
 
     const handleInputChange = (expression) => {
         setUserCronStringExpression(expression);
+        setErrors([]);
     };
 
 
@@ -29,7 +30,7 @@ function Output({ cronExpression, onLoad }) {
 
 
         const validationErrors = validateForm(userCronStringExpression);
-        setErrors({});
+        setErrors([]);
 
 
         if (validationErrors && Object.keys(validationErrors).length === 0) {
@@ -55,26 +56,33 @@ function Output({ cronExpression, onLoad }) {
     }
 
     return (
-        <div className='container'>
+        <div className='mt-3 container'>
+
+
+            <div className='output-container'>
 
 
 
-            <input
-                type="text"
-                value={userCronStringExpression}
-                onChange={(e) => handleInputChange(e.target.value)}
-            />
-            <button className='' onClick={handleLoad}>Load</button>
+                <input
+                    className='cron-input'
+                    type="text"
+                    value={userCronStringExpression}
+                    onChange={(e) => handleInputChange(e.target.value)}
+                />
+                <button className='btn btn-outline-primary' onClick={handleLoad}>Load</button>
 
-            {errors && Object.keys(errors).map((fieldName) => (
-                <div key={fieldName}>
-                    {errors[fieldName] && <span>{errors[fieldName]}</span>}
-                </div>
-            ))}
+              
+
+                {errors && errors.map((error, index) => (
+                        <div key={index}>
+                            <span>{error.fieldName} - {error.message}</span>
+                        </div>
+                    ))}
 
 
+
+            </div>
         </div>
-
     );
 };
 

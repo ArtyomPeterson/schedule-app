@@ -15,13 +15,16 @@ export const validateTime = (times) => {
 
     const seen = new Set();
     for (const { index, value } of times) {
-        if (seen.has(value)) {
+        if (value !== "") {
+             if (seen.has(value)) {
             errors.push({
                 index: index,
                 message: 'The Times values should not be repeated.'
             });
         }
         seen.add(value);
+        }
+       
     }
 
 

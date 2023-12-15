@@ -15,9 +15,13 @@ function CustomTab({ onSave, cronCustomExpression }) {
 
     const [errors, setErrors] = useState({});
 
+    useEffect(() => {
+        setErrors(validateForm(formData));
+    }, [formData]);
+
     const [infoText, setInfoText] = useState('');
 
-    
+
 
 
 
@@ -53,8 +57,8 @@ function CustomTab({ onSave, cronCustomExpression }) {
     const handleSave = (event) => {
         event.preventDefault();
 
-        console.log("errors"+ errors);
-        console.log("formData"+ formData);
+        console.log("errors" + errors);
+        console.log("formData" + formData);
 
         const validationErrors = validateForm(formData);
 
@@ -76,37 +80,125 @@ function CustomTab({ onSave, cronCustomExpression }) {
     return (
 
 
-        <div className='tab-container custom-tab-container'>
+        <div className='tab-container'>
             <form onSubmit={handleSave}>
-                {Object.keys(formData).map((fieldName) => (
+                <div className='custom-container'>
 
-                    <label key={fieldName} onClick={() => handleInfoClick(fieldName)}>
-                        {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} :
 
-                        <input
-                            type="text"
-                            name={fieldName}
-                            value={formData[fieldName]}
-                            onChange={handleChange}
-                        />
-                        <div>
-                            {errors && errors.length > 0 && renderErrors(fieldName)}
-                        </div>
 
+                    <label onClick={()=>{handleInfoClick("minutes")}}>
+                        Minutes :
                     </label>
 
-                ))}
+                    <div className='custom-input'
+                     onClick={()=>{handleInfoClick("minutes")}} >
+                        <input
+                            className='cron-input'
+                            type="text"
+                            name="minutes"
+                            value={formData.minutes}
+                            onChange={handleChange}
+                            
+                            
+                        />
 
-                <div className="info-block">
-                    <pre>{infoText}</pre>
+                        <div className="error-container">
+                            {errors && errors.length > 0 && renderErrors("minutes")}
+                        </div>
+                    </div>
+
+                    <div className="info-block">
+                        <pre>{infoText}</pre>
+                    </div>
+
+                    <label onClick={()=>{handleInfoClick("hours")}}>
+                        Hours :
+                    </label>
+                    <div className='custom-input'
+                     onClick={()=>{handleInfoClick("hours")}}>
+                        <input
+                            className='cron-input'
+                            type="text"
+                            name='hours'
+                            value={formData.hours}
+                            onChange={handleChange}
+                        />
+
+                        <div className="error-container">
+                            {errors && errors.length > 0 && renderErrors("hours")}
+                        </div>
+                    </div>
+
+                    <label  onClick={()=>{handleInfoClick("days")}}>
+                        Days :
+                    </label>
+                    <div className='custom-input'
+                     onClick={()=>{handleInfoClick("days")}}>
+                        <input
+                            className='cron-input'
+                            type="text"
+                            name="days"
+                            value={formData.days}
+                            onChange={handleChange}
+                        />
+
+                        <div className="error-container">
+                            {errors && errors.length > 0 && renderErrors("days")}
+                        </div>
+                    </div>
+
+                    <label  onClick={()=>{handleInfoClick("months")}}>
+                        Months :
+                    </label>
+                    <div className='custom-input'
+                     onClick={()=>{handleInfoClick("months")}}>
+                        <input
+                            className='cron-input'
+                            type="text"
+                            name="months"
+                            value={formData.months}
+                            onChange={handleChange}
+                        />
+
+                        <div className="error-container">
+                            {errors && errors.length > 0 && renderErrors("months")}
+                        </div>
+                    </div>
+
+                    <label  onClick={()=>{handleInfoClick("daysOfWeek")}}>
+                        Days of Week :
+                    </label>
+                    <div className='custom-input'
+                     onClick={()=>{handleInfoClick("daysOfWeek")}}>
+                        <input
+                            className='cron-input'
+                            type="text"
+                            name="daysOfWeek"
+                            value={formData.daysOfWeek}
+                            onChange={handleChange}
+                        />
+
+                        <div className="error-container">
+                            {errors && errors.length > 0 && renderErrors("daysOfWeek")}
+                        </div>
+                    </div>
+
+
+
+                    
                 </div>
 
-                <div className="button-container">
-                    <button type="submit" className='tab-button' onClick={handleSave}>Save</button>
-                </div>
+
+                <button 
+                type="submit" 
+                className='btn btn-primary' 
+                disabled={errors && errors.length !== 0}
+                onClick={handleSave}>Save</button>
+
             </form>
         </div >
-    );
+    )
+
 };
 
 
