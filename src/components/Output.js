@@ -26,34 +26,55 @@ function Output({ cronExpression, onLoad }) {
     };
 
 
+
+
+
+
+
+
     const handleLoad = () => {
 
+        console.log("errors до setErrors: " + errors);
 
-        const validationErrors = validateForm(userCronStringExpression);
+        //собираем из строчки вывода двумерный массив строк.
+        const formData = userCronStringExpression.split(' ').map((group) =>
+            group.split(",").map((value) => value.trim()));
+        console.log("formData: " + formData);
+
+        if (formData.length !== 5) {
+            setErrors([{
+                fieldName: "form",
+                message: 'Invalid Сron format. Enter 5 values please.'
+            }]);
+            return;
+        };
+
+        const newCronExpression = {
+            minutes: formData[0],
+            hours: formData[1],
+            days: formData[2],
+            months: formData[3],
+            daysOfWeek: formData[4]
+        };
+
+
         setErrors([]);
+        const validationErrors = validateForm(newCronExpression);
+        setErrors(validationErrors);
 
-
-        if (validationErrors && Object.keys(validationErrors).length === 0) {
-
-            const valuesArray = userCronStringExpression.split(" ").map((group) =>
-                group.split(",").map((value) => value.trim())
-            );
-
-            const newCronExpression = {
-                minutes: valuesArray[0],
-                hours: valuesArray[1],
-                days: valuesArray[2],
-                months: valuesArray[3],
-                daysOfWeek: valuesArray[4],
-            };
-
+        if (validationErrors.length === 0) {
             onLoad(newCronExpression);
-
         } else {
-            setErrors(validationErrors);
-
+            console.log("найдены ошибки: " + validationErrors);
         }
-    }
+
+    };
+
+
+
+
+
+
 
     return (
         <div className='mt-3 container'>
@@ -71,13 +92,13 @@ function Output({ cronExpression, onLoad }) {
                 />
                 <button className='btn btn-outline-primary' onClick={handleLoad}>Load</button>
 
-              
+
 
                 {errors && errors.map((error, index) => (
-                        <div key={index}>
-                            <span>{error.fieldName} - {error.message}</span>
-                        </div>
-                    ))}
+                    <div key={index}>
+                        <span>{error.fieldName} - {error.message}</span>
+                    </div>
+                ))}
 
 
 

@@ -1,53 +1,50 @@
 export const validateForm = (cronExpression) => {
     const errors = [];
+    // let selectedMonths = {
+    //     1: false,
+    //     2: false,
+    //     3: false,
+    //     4: false,
+    //     5: false,
+    //     6: false,
+    //     7: false,
+    //     8: false,
+    //     9: false,
+    //     10: false,
+    //     11: false,
+    //     12: false
+    // };
 
-    let formData;
 
-    const substrings = cronExpression.split(' ');
-    if (substrings.length === 5) {
-        formData = {
-            minutes: substrings[0],
-            hours: substrings[1],
-            days: substrings[2],
-            months: substrings[3],
-            daysOfWeek: substrings[4]
-        };
-    } else {
-        return { form: 'Invalid Сron format. enter 5 values' };
+    for (const fieldName in cronExpression) {
+        if (Object.hasOwnProperty.call(cronExpression, fieldName)) {
+            const fieldValues = cronExpression[fieldName];
+            const message = validateField(fieldValues, fieldName);
+
+            if (message) {
+                errors.push({ fieldName, message });
+            }
+        }
     }
 
 
-    //наполнение массива errors
-    const validateFieldAndSetErrors = (fieldValue, fieldName) => {
-        const errorMessage = validateField(fieldValue, fieldName);
-        if (errorMessage) {
-            errors.push({
-                fieldName: fieldName,
-                message: errorMessage
-            });
-        }
-    };
-
-    // проверка содержимого полей
-    validateFieldAndSetErrors(formData.daysOfWeek, 'daysOfWeek');
-    validateFieldAndSetErrors(formData.months, 'months');
-    validateFieldAndSetErrors(formData.days, 'days');
-    validateFieldAndSetErrors(formData.hours, 'hours');
-    validateFieldAndSetErrors(formData.minutes, 'minutes');
-    // проверка взаимосвязи полей ("?")
+    const daysOfWeekHasQuestionMark = Array.isArray(cronExpression.daysOfWeek) && cronExpression.daysOfWeek.some(str => str === "?");
+    const daysOfWeekHasAsterisk = Array.isArray(cronExpression.daysOfWeek) && cronExpression.daysOfWeek.some(str => str === "*");
+    const allDaysOfWeekAreSelected = parseNumberRange(cronExpression.daysOfWeek).length === 7;
     
-    const daysOfWeekHasQuestionMark = formData.daysOfWeek.split(',').some(str => str === "?");
-    const daysOfWeekAsterisk = formData.daysOfWeek.split(',').some(str => str === "*");
-    const daysHasQuestionMark = formData.days.split(',').some(str => str === "?");
-    const daysHasAsterisk = formData.days.split(',').some(str => str === "*");
+    
+    const daysHasQuestionMark = Array.isArray(cronExpression.days) && cronExpression.days.some(str => str === "?");
+    const daysHasAsterisk = Array.isArray(cronExpression.days) && cronExpression.days.some(str => str === "*");
+    const allDaysAreSelected = parseNumberRange(cronExpression.days).length === 31;
 
-    if (daysHasAsterisk && daysOfWeekHasQuestionMark) {
+
+    if ((daysHasAsterisk || allDaysAreSelected) && daysOfWeekHasQuestionMark) {
         errors.push({
             fieldName: "daysOfWeek",
             message: 'All days of Month are selected. Use * or another value.'
         });
     }
-    if (daysHasQuestionMark && daysOfWeekAsterisk) {
+    if (daysHasQuestionMark && (daysOfWeekHasAsterisk || allDaysOfWeekAreSelected)) {
         errors.push({
             fieldName: "days",
             message: 'All days of Week are selected. Use * or another value.'
@@ -63,19 +60,19 @@ export const validateForm = (cronExpression) => {
             message: 'Use * or another value.'
         });
     }
-    if (daysHasQuestionMark && daysHasAsterisk) {
+    if (daysHasQuestionMark && (daysHasAsterisk || allDaysAreSelected)) {
         errors.push({
             fieldName: "days",
-            message: 'You can\'t have \'*\' and \'?\' along.'
+            message: 'days - You can\'t have \'*\' and \'?\' along.'
         });
     }
-    if (daysOfWeekHasQuestionMark && daysOfWeekAsterisk) {
+    if (daysOfWeekHasQuestionMark && (daysOfWeekHasAsterisk || allDaysOfWeekAreSelected)) {
         errors.push({
             fieldName: "daysOfWeek",
-            message: 'You can\'t have \'*\' and \'?\' along.'
+            message: 'daysOfWeek - You can\'t have \'*\' and \'?\' along.'
         });
     }
-    
+
 
     return errors;
 }
@@ -83,8 +80,7 @@ export const validateForm = (cronExpression) => {
 
 
 //проверяет поле. если есть ошибка возвращает строку с ошибкой. если нет, то null
-const validateField = (fieldValue, fieldName) => {
-    const parts = fieldValue.split(',');
+const validateField = (fieldValues, fieldName) => {
 
     const dayOfWeekNames = {
         0: "mon",
@@ -119,19 +115,19 @@ const validateField = (fieldValue, fieldName) => {
 
 
 
-    for (const part of parts) {
+    for (const fieldValue of fieldValues) {
         // если введено пустое значение
-        if (part === '') {
+        if (fieldValue === '') {
             return `Invalid value. The value should not be empty.`;
         }
         // если введен *
-        if (part === '*') {
+        if (fieldValue === '*') {
             continue;
         }
 
         // если введен шаг
-        if (part.startsWith('*/')) {
-            const step = part.substring(2);
+        if (fieldValue.startsWith('*/')) {
+            const step = fieldValue.substring(2);
             if (step === "") {
                 return `Invalid value. The value should not be empty.`;
             }
@@ -148,9 +144,12 @@ const validateField = (fieldValue, fieldName) => {
             }
         }
         // если введен диапазон
-        if (part.includes('-')) {
-            const [start, end] = part.split('-');
+        if (fieldValue.includes('-')) {
+            const [start, end] = fieldValue.split('-');
             if (start === "" || end === "") {
+                console.log("start "+ start);
+                console.log("end "+ end);
+
                 return `Invalid value. The value should not be empty.`;
             }
             // если оба значения — строки (только daysOfWeek)
@@ -178,22 +177,40 @@ const validateField = (fieldValue, fieldName) => {
             // если одно значение строка а другое число
             return `Invalid value.`;
         }
-        if (!isNaN(part)) { // если введено число
-            const parsedNumber = parseInt(part, 10);
+        if (!isNaN(fieldValue)) { // если введено число
+            const parsedNumber = parseInt(fieldValue, 10);
             if (parsedNumber < minValues[fieldName] || parsedNumber > maxValues[fieldName]) {
                 return `Invalid values. The number must be from ${minValues[fieldName]} to ${maxValues[fieldName]}`;
             }
             continue;
         } else { // если введен текст (только daysOfWeek)
-            if (fieldName === 'daysOfWeek' && Object.values(dayOfWeekNames).includes(part)) {
+            if (fieldName === 'daysOfWeek' && Object.values(dayOfWeekNames).includes(fieldValue)) {
                 // if (fieldName === 'daysOfWeek' && dayOfWeekNames.hasOwnProperty(part)) {
                 continue;
-            } else if ((fieldName === 'days' || fieldName === 'daysOfWeek') && part === "?") {
+            } else if ((fieldName === 'days' || fieldName === 'daysOfWeek') && fieldValue === "?") {
                 continue;
             } else return `Invalid value.`;
         }
 
 
     };
-    return "";
+    return;
+}
+
+
+function parseNumberRange(rangeArray) {
+    const result = new Set();
+    rangeArray.forEach(item => {
+        if (item.includes('-')) {
+            const [start, end] = item.split('-').map(Number);
+            for (let i = start; i <= end; i++) {
+                result.add(i);
+            }
+        } else {
+            result.add(Number(item));
+        }
+    });
+    console.log('parseRange ' + Array.from(result));
+
+    return Array.from(result);
 }

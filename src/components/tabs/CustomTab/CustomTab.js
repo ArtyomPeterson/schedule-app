@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { validateForm } from '../../../validators/customFormValidator';
+import { validateForm } from '../../../validators/cronValidator';
 import getInfoText from './InfoText';
 import { updateUI } from '../../../utils/updateCustomTabState';
 
@@ -13,17 +13,19 @@ function CustomTab({ onSave, cronCustomExpression }) {
         daysOfWeek: '',
     });
 
+    const [infoText, setInfoText] = useState('');
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        setErrors(validateForm(formData));
+        const newCronExpression = {
+            minutes: formData.minutes.split(","),
+            hours: formData.hours.split(","),
+            days: formData.days.split(","),
+            months: formData.months.split(","),
+            daysOfWeek: formData.daysOfWeek.split(",")
+        };
+        setErrors(validateForm(newCronExpression));
     }, [formData]);
-
-    const [infoText, setInfoText] = useState('');
-
-
-
-
 
     useEffect(() => {
         if (cronCustomExpression.minutes[0] !== '') {
@@ -31,8 +33,12 @@ function CustomTab({ onSave, cronCustomExpression }) {
         }
     }, [cronCustomExpression]);
 
-
-
+    useEffect(() => {
+        console.log('errors in CustomTab: ');
+        Array.isArray(errors) && errors.map(error => {
+            console.log(error);
+        })
+    }, [errors]);
 
     const handleInfoClick = (fieldName) => {
         setInfoText(getInfoText(fieldName))
@@ -54,28 +60,33 @@ function CustomTab({ onSave, cronCustomExpression }) {
         ));
     };
 
+
+
     const handleSave = (event) => {
         event.preventDefault();
 
-        console.log("errors" + errors);
-        console.log("formData" + formData);
+        console.log("errors до setErrors: " + errors);
+        console.log("formData: " + formData);
+        
+        const newCronExpression = {
+            minutes: formData.minutes.split(","),
+            hours: formData.hours.split(","),
+            days: formData.days.split(","),
+            months: formData.months.split(","),
+            daysOfWeek: formData.daysOfWeek.split(",")
+        };
 
-        const validationErrors = validateForm(formData);
-
+        setErrors([]);
+        const validationErrors = validateForm(newCronExpression);
         setErrors(validationErrors);
 
-
-        if (Object.keys(validationErrors).length === 0) {
-            const newCronExpression = {
-                minutes: formData.minutes.split(","),
-                hours: formData.hours.split(","),
-                days: formData.days.split(","),
-                months: formData.months.split(","),
-                daysOfWeek: formData.daysOfWeek.split(",")
-            }
+        if (validationErrors.length === 0) {
             onSave(newCronExpression);
+        } else {
+            console.log("найдены ошибки: " + validationErrors);
         }
     };
+
 
     return (
 
@@ -86,20 +97,20 @@ function CustomTab({ onSave, cronCustomExpression }) {
 
 
 
-                    <label onClick={()=>{handleInfoClick("minutes")}}>
+                    <label onClick={() => { handleInfoClick("minutes") }}>
                         Minutes :
                     </label>
 
                     <div className='custom-input'
-                     onClick={()=>{handleInfoClick("minutes")}} >
+                        onClick={() => { handleInfoClick("minutes") }} >
                         <input
                             className='cron-input'
                             type="text"
                             name="minutes"
                             value={formData.minutes}
                             onChange={handleChange}
-                            
-                            
+
+
                         />
 
                         <div className="error-container">
@@ -111,11 +122,11 @@ function CustomTab({ onSave, cronCustomExpression }) {
                         <pre>{infoText}</pre>
                     </div>
 
-                    <label onClick={()=>{handleInfoClick("hours")}}>
+                    <label onClick={() => { handleInfoClick("hours") }}>
                         Hours :
                     </label>
                     <div className='custom-input'
-                     onClick={()=>{handleInfoClick("hours")}}>
+                        onClick={() => { handleInfoClick("hours") }}>
                         <input
                             className='cron-input'
                             type="text"
@@ -129,11 +140,11 @@ function CustomTab({ onSave, cronCustomExpression }) {
                         </div>
                     </div>
 
-                    <label  onClick={()=>{handleInfoClick("days")}}>
+                    <label onClick={() => { handleInfoClick("days") }}>
                         Days :
                     </label>
                     <div className='custom-input'
-                     onClick={()=>{handleInfoClick("days")}}>
+                        onClick={() => { handleInfoClick("days") }}>
                         <input
                             className='cron-input'
                             type="text"
@@ -147,11 +158,11 @@ function CustomTab({ onSave, cronCustomExpression }) {
                         </div>
                     </div>
 
-                    <label  onClick={()=>{handleInfoClick("months")}}>
+                    <label onClick={() => { handleInfoClick("months") }}>
                         Months :
                     </label>
                     <div className='custom-input'
-                     onClick={()=>{handleInfoClick("months")}}>
+                        onClick={() => { handleInfoClick("months") }}>
                         <input
                             className='cron-input'
                             type="text"
@@ -165,11 +176,11 @@ function CustomTab({ onSave, cronCustomExpression }) {
                         </div>
                     </div>
 
-                    <label  onClick={()=>{handleInfoClick("daysOfWeek")}}>
+                    <label onClick={() => { handleInfoClick("daysOfWeek") }}>
                         Days of Week :
                     </label>
                     <div className='custom-input'
-                     onClick={()=>{handleInfoClick("daysOfWeek")}}>
+                        onClick={() => { handleInfoClick("daysOfWeek") }}>
                         <input
                             className='cron-input'
                             type="text"
@@ -185,15 +196,15 @@ function CustomTab({ onSave, cronCustomExpression }) {
 
 
 
-                    
+
                 </div>
 
 
-                <button 
-                type="submit" 
-                className='btn btn-primary' 
-                disabled={errors && errors.length !== 0}
-                onClick={handleSave}>Save</button>
+                <button
+                    type="submit"
+                    className='btn btn-primary'
+                    disabled={errors && errors.length !== 0}
+                    onClick={handleSave}>Save</button>
 
             </form>
         </div >
